@@ -21,37 +21,37 @@ ubx_proto_config_t rml_config[] = {
 };
 
 ubx_proto_port_t rml_ports[] = {
-    { .name="msr_pos", .in_type_name="double", .doc="current measured position"  },
-    { .name="msr_vel", .in_type_name="double", .doc="current measured velocity"  },
-    { .name="des_pos", .in_type_name="double", .doc="desired target position"  },
-    { .name="des_vel", .in_type_name="double", .doc="desired target velocity"  },
-    { .name="cmd_pos", .out_type_name="double", .doc="new position (controller input)"  },
-    { .name="cmd_vel", .out_type_name="double", .doc="new velocity (controller input)"  },
-    { .name="cmd_acc", .out_type_name="double", .doc="new acceleration (controller input)"  },
-    { .name="reached", .out_type_name="int", .doc="the final state has been reached"  },
+    { .name="pos_msr", .in_type_name="double", .doc="current measured position"  },
+    { .name="pos_des", .in_type_name="double", .doc="desired target position"  },
+    { .name="vel_msr", .in_type_name="double", .doc="current measured velocity"  },
+    { .name="vel_des", .in_type_name="double", .doc="desired target velocity"  },
+    { .name="pos_cmd", .out_type_name="double", .doc="new position (controller input)"  },
+    { .name="vel_cmd", .out_type_name="double", .doc="new velocity (controller input)"  },
+    { .name="acc_cmd", .out_type_name="double", .doc="new acceleration (controller input)"  },
+    { .name="reached", .out_type_name="int", .doc="target state reached event"  },
     { 0 },
 };
 
 struct rml_ports {
-    ubx_port_t* msr_pos;
-    ubx_port_t* msr_vel;
-    ubx_port_t* des_pos;
-    ubx_port_t* des_vel;
-    ubx_port_t* cmd_pos;
-    ubx_port_t* cmd_vel;
-    ubx_port_t* cmd_acc;
+    ubx_port_t* pos_msr;
+    ubx_port_t* vel_msr;
+    ubx_port_t* pos_des;
+    ubx_port_t* vel_des;
+    ubx_port_t* pos_cmd;
+    ubx_port_t* vel_cmd;
+    ubx_port_t* acc_cmd;
     ubx_port_t* reached;
 };
 
 void update_port_cache(ubx_block_t *b, struct rml_ports *ports)
 {
-    ports->msr_pos = ubx_port_get(b, "msr_pos");
-    ports->msr_vel = ubx_port_get(b, "msr_vel");
-    ports->des_pos = ubx_port_get(b, "des_pos");
-    ports->des_vel = ubx_port_get(b, "des_vel");
-    ports->cmd_pos = ubx_port_get(b, "cmd_pos");
-    ports->cmd_vel = ubx_port_get(b, "cmd_vel");
-    ports->cmd_acc = ubx_port_get(b, "cmd_acc");
+    ports->pos_msr = ubx_port_get(b, "pos_msr");
+    ports->vel_msr = ubx_port_get(b, "vel_msr");
+    ports->pos_des = ubx_port_get(b, "pos_des");
+    ports->vel_des = ubx_port_get(b, "vel_des");
+    ports->pos_cmd = ubx_port_get(b, "pos_cmd");
+    ports->vel_cmd = ubx_port_get(b, "vel_cmd");
+    ports->acc_cmd = ubx_port_get(b, "acc_cmd");
     ports->reached = ubx_port_get(b, "reached");
 }
 
@@ -95,13 +95,13 @@ int rml_init(ubx_block_t *b)
     /* cache and resize ports */
     update_port_cache(b, &inf->ports);
 
-    if (ubx_inport_resize(inf->ports.msr_pos, inf->data_len) ||
-        ubx_inport_resize(inf->ports.msr_vel, inf->data_len) ||
-        ubx_inport_resize(inf->ports.des_pos, inf->data_len) ||
-        ubx_inport_resize(inf->ports.des_vel, inf->data_len) ||
-        ubx_outport_resize(inf->ports.cmd_pos, inf->data_len) ||
-        ubx_outport_resize(inf->ports.cmd_vel, inf->data_len) ||
-        ubx_outport_resize(inf->ports.cmd_acc, inf->data_len) != 0) {
+    if (ubx_inport_resize(inf->ports.pos_msr, inf->data_len) ||
+        ubx_inport_resize(inf->ports.vel_msr, inf->data_len) ||
+        ubx_inport_resize(inf->ports.pos_des, inf->data_len) ||
+        ubx_inport_resize(inf->ports.vel_des, inf->data_len) ||
+        ubx_outport_resize(inf->ports.pos_cmd, inf->data_len) ||
+        ubx_outport_resize(inf->ports.vel_cmd, inf->data_len) ||
+        ubx_outport_resize(inf->ports.acc_cmd, inf->data_len) != 0) {
         return -1;
     }
 
@@ -182,51 +182,51 @@ void rml_step(ubx_block_t *b)
     struct rml_info *inf = (struct rml_info*) b->private_data;
 
     double tmparr[inf->data_len];
-    double cmd_pos[inf->data_len];
-    double cmd_vel[inf->data_len];
-    double cmd_acc[inf->data_len];
+    double pos_cmd[inf->data_len];
+    double vel_cmd[inf->data_len];
+    double acc_cmd[inf->data_len];
 
     /* new target pos? */
-    len = read_double_array(inf->ports.des_pos, tmparr, inf->data_len);
+    len = read_double_array(inf->ports.pos_des, tmparr, inf->data_len);
 
     if(len == inf->data_len) {
         write_int(inf->ports.reached, &reached);
 
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->TargetPositionVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "new des_pos[%lu] = %f", i, tmparr[i]);
+            ubx_debug(b, "new pos_des[%lu] = %f", i, tmparr[i]);
         }
     }
 
     /* new target vel? */
-    len = read_double_array(inf->ports.des_vel, tmparr, inf->data_len);
+    len = read_double_array(inf->ports.vel_des, tmparr, inf->data_len);
 
     if(len == inf->data_len) {
         write_int(inf->ports.reached, &reached);
 
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->TargetVelocityVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "new des_vel[%lu] = %f", i, tmparr[i]);
+            ubx_debug(b, "new vel_des[%lu] = %f", i, tmparr[i]);
         }
     }
 
     /* new measured pos? */
-    len = read_double_array(inf->ports.msr_pos, tmparr, inf->data_len);
+    len = read_double_array(inf->ports.pos_msr, tmparr, inf->data_len);
 
     if(len == inf->data_len) {
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->CurrentPositionVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "msr_pos[%lu] = %f", i, tmparr[i]);
+            ubx_debug(b, "pos_msr[%lu] = %f", i, tmparr[i]);
         }
     }
 
     /* new measured vel? */
-    len = read_double_array(inf->ports.msr_vel, tmparr, inf->data_len);
+    len = read_double_array(inf->ports.vel_msr, tmparr, inf->data_len);
 
     if(len == inf->data_len) {
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->CurrentVelocityVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "msr_vel[%lu] = %f", i, tmparr[i]);
+            ubx_debug(b, "vel_msr[%lu] = %f", i, tmparr[i]);
         }
     }
 
@@ -273,23 +273,23 @@ void rml_step(ubx_block_t *b)
     }
 
     for (long i=0; i<inf->data_len; i++) {
-        cmd_pos[i] = inf->OP->NewPositionVector->VecData[i];
-        ubx_debug(b, "cmd_pos[%lu] = %f", i, cmd_pos[i]);
+        pos_cmd[i] = inf->OP->NewPositionVector->VecData[i];
+        ubx_debug(b, "pos_cmd[%lu] = %f", i, pos_cmd[i]);
     }
 
     for (long i=0; i<inf->data_len; i++) {
-        cmd_vel[i] = inf->OP->NewVelocityVector->VecData[i];
-        ubx_debug(b, "cmd_vel[%lu] = %f", i, cmd_vel[i]);
+        vel_cmd[i] = inf->OP->NewVelocityVector->VecData[i];
+        ubx_debug(b, "vel_cmd[%lu] = %f", i, vel_cmd[i]);
     }
 
     for (long i=0; i<inf->data_len; i++) {
-        cmd_acc[i] = inf->OP->NewAccelerationVector->VecData[i];
-        ubx_debug(b, "cmd_acc[%lu] = %f", i, cmd_acc[i]);
+        acc_cmd[i] = inf->OP->NewAccelerationVector->VecData[i];
+        ubx_debug(b, "acc_cmd[%lu] = %f", i, acc_cmd[i]);
     }
 
-    write_double_array(inf->ports.cmd_pos, cmd_pos, inf->data_len);
-    write_double_array(inf->ports.cmd_vel, cmd_vel, inf->data_len);
-    write_double_array(inf->ports.cmd_acc, cmd_acc, inf->data_len);
+    write_double_array(inf->ports.pos_cmd, pos_cmd, inf->data_len);
+    write_double_array(inf->ports.vel_cmd, vel_cmd, inf->data_len);
+    write_double_array(inf->ports.acc_cmd, acc_cmd, inf->data_len);
 }
 
 
