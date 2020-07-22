@@ -1,8 +1,8 @@
 return block 
 {
-      name = "manipulator",
+      name = "mc/manipulator-dummy",
       license = "BSD-3-Clause",
-      meta_data = "a generic robot manipulator interface block",
+      meta_data = "a generic, empty dummy manipulator block",
 
       port_cache = true,
 
