@@ -2,7 +2,7 @@
  * Reflexxes based trajectory generator block.
  */
 
-#define UBX_DEBUG
+#undef UBX_DEBUG
 #include <ubx/ubx.h>
 
 #include <RMLTypeII/ReflexxesAPI.h>
@@ -10,9 +10,11 @@
 #include <RMLTypeII/RMLPositionInputParameters.h>
 #include <RMLTypeII/RMLPositionOutputParameters.h>
 
-char rml_meta[] = "a reflexxes based trajectory generator";
+const char rml_block_name[] = "mc/trajgen_rml";
+const char rml_meta[] = "a reflexxes based trajectory generator";
 
 ubx_proto_config_t rml_config[] = {
+    { .name = "loglevel", .type_name = "int" },
     { .name = "data_len", .type_name = "long", .doc = "data array length" },
     { .name = "max_vel", .type_name = "double", .doc="maximum velocity" },
     { .name = "max_acc", .type_name = "double", .doc="maximum acceleration" },
@@ -194,7 +196,7 @@ void rml_step(ubx_block_t *b)
 
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->TargetPositionVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "new pos_des[%lu] = %f", i, tmparr[i]);
+            ubx_info(b, "new pos_des[%lu] = %f", i, tmparr[i]);
         }
     }
 
@@ -206,7 +208,7 @@ void rml_step(ubx_block_t *b)
 
         for (long i=0; i<inf->data_len; i++) {
             inf->IP->TargetVelocityVector->VecData[i] = tmparr[i];
-            ubx_debug(b, "new vel_des[%lu] = %f", i, tmparr[i]);
+            ubx_info(b, "new vel_des[%lu] = %f", i, tmparr[i]);
         }
     }
 
@@ -292,9 +294,8 @@ void rml_step(ubx_block_t *b)
     write_double_array(inf->ports.acc_cmd, acc_cmd, inf->data_len);
 }
 
-
 ubx_proto_block_t rml_block = {
-    .name = "trajgen_rml",
+    .name = rml_block_name,
     .meta_data = rml_meta,
     .type = BLOCK_TYPE_COMPUTATION,
     .configs = rml_config,
@@ -313,7 +314,7 @@ int rml_mod_init(ubx_node_t* ni)
 
 void rml_mod_cleanup(ubx_node_t *ni)
 {
-    ubx_block_unregister(ni, "trajgen_rml");
+    ubx_block_unregister(ni, rml_block_name);
 }
 
 UBX_MODULE_LICENSE_SPDX(BSD-3-Clause)
