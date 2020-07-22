@@ -17,9 +17,9 @@
 This repo contains a set of generic, hardware independent microblx
 blocks as well as composable usc models. The [Block
 models](#block-models) section describes relevant planned and
-available microblx blocks. Section [Compositions](#compositions)
-describes generic and reusable composition models for building typical
-motion control systems using the former blocks.
+available blocks. Section [Compositions](#compositions) describes
+generic and reusable composition models for building typical motion
+control systems using the former blocks.
 
 
 ## Block models
@@ -64,7 +64,7 @@ pairs of ports can be omitted.
 [PID](https://microblx.readthedocs.io/en/latest/block_index.html#module-pid)
 is a generic microblx block that can be used for joinspace control.
 
-Status: *available*
+*Status*: *available*
 
 **Configs**
 
@@ -81,27 +81,29 @@ Status: *available*
 
 #### Saturation
 
-Status: available
+*Status*: *available*
 
 [saturation](https://microblx.readthedocs.io/en/latest/block_index.html#module-saturation-double)
 is a generic microblx block that can be used to limit the output of a
 controller such as the PID.
 
 **Configs**
-- data_len [`long`]: *data array length*
-- lower_limits [`double`]: *saturation lower limits*
-- upper_limits [`double`]: *saturation upper limits*
+- `data_len` [`long`]: *data array length*
+- `lower_limits` [`double`]: *saturation lower limits*
+- `upper_limits` [`double`]: *saturation upper limits*
  
 **Ports**
-- in [in, `double`]: *input signal to saturate*
-- out  [out, `double`]: *saturated output signal*
+- `in` [in, `double`]: *input signal to saturate*
+- `out` [out, `double`]: *saturated output signal*
 
 
-### Trajectory generator
+### trajgen_rml: RML based joint space trajectory generator
 
-Something like this is needed if we want to be able to define a
-composition as a drop in replacement for `ros_control`.
+*Status* *available*
 
+This block is based on the [reflexxes motion
+library](https://github.com/kschwan/RMLTypeII) and provides a simple
+to use block that is useful for free space motion in joint space.
 
 **Configs**
 - data_len [`long`]: *data array length*
@@ -120,17 +122,24 @@ composition as a drop in replacement for `ros_control`.
 
 ## Compositions
 
-```Lua
-return system {
-	imports = { "stdtypes", "lfds_cyclic", "pid", "robotX" },
-	blocks = {
-		{ name = "armXY1", type="drivers/armXY" },
-		{ name = "
-	},
-}
+Based on the above blocks, the following compositions are available:
 
-```
+- [ptrig_nrt](usc/ptrig_nrt.usc) a ptrig mixin model to avoid
+  cluttering the application with platform specifics. Typically passed
+  as a second usc model on the command-line to `ubx-launch`
 
+- [pid_saturated](usc/pid_saturated.usc) is a small composition
+  of a PID controller and a saturation block to constraint the PID's
+  output to safe values.
+
+- [app_jnt_pid](usc/app_jnt_vel.usc) a small composition based on
+  `pid_saturated` and the `manipulator-dummy` block.
+
+- [app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
+  composition using `trajgen_rml` and the `manipulator-dummy`
+  block. The desired target `pos` and `vel` ports are exported via
+  mqueues and can be sent from the command line using `ubx-mq`. See
+  the comment in the usc file.
 
 References
 ----------
