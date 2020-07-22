@@ -1,12 +1,18 @@
 /*
  * a robot manipulator skelleton function block
+ *
+ * the purpose of this block is to serve as a starting point for real
+ * robot driver blocks and to put down a recommended driver interface.
  */
 #define UBX_DEBUG
 
 #include <ubx.h>
 
-/* compile time constant */
-static const long NUM_JOINTS = 7;
+/* of course this could be made configurable, but for any real robot
+ * that will not be the case, so we don't bother with it here */
+#define NUM_JOINTS 	7
+
+const char manipulator_block_name[] = "mc/manipulator-dummy";
 
 enum CTRL_MODE {
 	POS = 0,
@@ -24,11 +30,11 @@ const char *ctrl_modes [] = {
 };
 
 ubx_proto_config_t manipulator_config[] = {
-	{ .name="ctrl_mode", .type_name = "int", .max=1, .doc="initial ctrl_mode: 0: pos (def), 1: vel, 2: eff, 3: cur" },
+	{ .name="ctrl_mode", .type_name = "int", .min=1, .max=1, .doc="initial ctrl_mode: 0: pos, 1: vel, 2: eff, 3: cur" },
 	{ 0 },
 };
 
-const char manipulator_meta[] = "a empty skelleton manipulator interface block";
+const char manipulator_meta[] = "a dummy robotic manipulator block";
 
 ubx_proto_port_t manipulator_ports[] = {
 	{ .name="ctrl_mode", .in_type_name="int", .in_data_len=1, .doc="port to switch control mode at runtime" },
@@ -58,6 +64,8 @@ struct manipulator_info
 		ubx_port_t* cur_msr;
 		ubx_port_t* cur_cmd;
 	} ports;
+
+	double pos[NUM_JOINTS];
 };
 
 int manipulator_init(ubx_block_t *b)
@@ -79,18 +87,14 @@ int manipulator_init(ubx_block_t *b)
 
 	/* ctrl_mode */
 	len = cfg_getptr_int(b, "ctrl_mode", &ctrl_mode);
-	assert(len>=0);
+	assert(len>0);
 
-	if (len > 0) {
-		if(*ctrl_mode < 0 || *ctrl_mode >= __CTRL_MODE_LAST__) {
-			ubx_err(b, "invalid ctrl_mode %i", *ctrl_mode);
-			ret = -1;
-			goto out_free;
-		}
-		inf->ctrl_mode = *ctrl_mode;
-	} else {
-		inf->ctrl_mode = 0;
+	if(*ctrl_mode < 0 || *ctrl_mode >= __CTRL_MODE_LAST__) {
+		ubx_err(b, "invalid ctrl_mode %i", *ctrl_mode);
+		ret = -1;
+		goto out_free;
 	}
+	inf->ctrl_mode = *ctrl_mode;
 
 	/* cache ports */
 	inf->ports.ctrl_mode = ubx_port_get(b, "ctrl_mode");
@@ -140,6 +144,7 @@ void manipulator_step(ubx_block_t *b)
 {
 	int ctrl_mode;
 	long len;
+
 	struct manipulator_info *inf = (struct manipulator_info*) b->private_data;
 
 	/* check whether a mode switch has been detected */
@@ -157,18 +162,20 @@ void manipulator_step(ubx_block_t *b)
 		}
 	}
 cont:
-	/* read data based on ctrl_mode and do something */
+	/* ideal manipulator: pos_cmd is pos_msr */
+	len = read_double_array(inf->ports.pos_cmd, inf->pos, NUM_JOINTS);
+	write_double_array(inf->ports.pos_msr,	inf->pos, NUM_JOINTS);
+
 	return;
 }
 
 ubx_proto_block_t manipulator_block = {
-	.name = "manipulator-skel",
+	.name = manipulator_block_name,
 	.type = BLOCK_TYPE_COMPUTATION,
 	.meta_data = manipulator_meta,
 	.configs = manipulator_config,
 	.ports = manipulator_ports,
 
-	/* ops */
 	.init = manipulator_init,
 	.start = manipulator_start,
 	.stop = manipulator_stop,
@@ -176,9 +183,6 @@ ubx_proto_block_t manipulator_block = {
 	.step = manipulator_step,
 };
 
-
-
-/* manipulator module init and cleanup functions */
 int manipulator_mod_init(ubx_node_t* nd)
 {
 	return ubx_block_register(nd, &manipulator_block);
@@ -186,7 +190,7 @@ int manipulator_mod_init(ubx_node_t* nd)
 
 void manipulator_mod_cleanup(ubx_node_t *nd)
 {
-	ubx_block_unregister(nd, "manipulator-skel");
+	ubx_block_unregister(nd, manipulator_block_name);
 }
 
 UBX_MODULE_INIT(manipulator_mod_init)
