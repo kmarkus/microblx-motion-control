@@ -26,12 +26,13 @@ install(TARGETS manipulator DESTINATION ${UBX_MODDIR})
 
 # trajgen_rml
 find_library(RML_LIB NAMES ReflexxesTypeII libReflexxesTypeII)
+find_path(RML_INC RMLTypeII/ReflexxesAPI.h)
 
-if ("${RML_LIB_NOTFOUND}" OR "${RML_INC_NOTFOUND}")
-  message("libReflexxesTypeII NOT found, will not build trajgen_rml")
-else()
+if (RML_LIB AND RML_INC)
   message("found libReflexxesTypeII")
   set(LIBRML_FOUND TRUE)
+else()
+  message("libReflexxesTypeII NOT found, will not build trajgen_rml")
 endif()
 
 if ("${LIBRML_FOUND}")
@@ -39,7 +40,7 @@ if ("${LIBRML_FOUND}")
   set_target_properties(trajgen_rml PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE PREFIX "")
   target_compile_options(trajgen_rml PUBLIC
     ${UBX_CFLAGS}
-    -I${RML_INC}
+    -I${RML_INC}/RMLTypeII
     -Werror -Wno-missing-field-initializers -fvisibility=hidden)
   target_link_libraries(trajgen_rml ${UBX_LDFLAGS} ${RML_LIB})
   install(TARGETS trajgen_rml DESTINATION ${UBX_MODDIR})
