@@ -28,12 +28,23 @@ control systems using the former blocks.
 
 ## Installation
 
-Dependencies are 
+**Dependencies**
 
 - microblx v0.9 or newer
 - for the `trajgen_rml` block the reflexxes library is required. It
   was tested with [this](https://github.com/kschwan/RMLTypeII)
   version.
+
+**Building**
+
+```bash
+$ mkdir build
+$ cd build
+$ cmake ..
+ ...
+$ make
+$ sudo make install
+```
 
 ## Blocks
 
@@ -130,6 +141,7 @@ $ ubx-mq write pid.des '{0,0.1,0.1,0.1,0.1,0}'  -r 0.1
 With this, the error messages will stop.
 
 ### `app_jnt_moveto`
+
 
 [app_jnt_moveto](usc/app_jnt_moveto.usc) a small joint space "move-to"
 composition using `trajgen_rml` and the `manipulator` block. The
