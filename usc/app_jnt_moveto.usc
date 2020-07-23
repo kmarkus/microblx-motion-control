@@ -34,7 +34,7 @@ return bd.system {
    },
 
    blocks = {
-      { name = "arm", type="mc/manipulator-dummy" },
+      { name = "arm", type="mc/manipulator" },
       { name = "trajgen", type="mc/trajgen_rml" },
       { name = "trig", type="ubx/trig" },
    },

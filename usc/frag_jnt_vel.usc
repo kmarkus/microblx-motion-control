@@ -19,7 +19,7 @@ return bd.system {
    },
 
    blocks = {
-      { name = "arm", type="mc/manipulator-dummy" },
+      { name = "arm", type="mc/manipulator" },
       { name = "trig", type="ubx/trig" },
    },
 

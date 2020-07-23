@@ -1,5 +1,7 @@
 /*
  * Reflexxes based trajectory generator block.
+ * Copyright (C) 2014-2020 Markus Klotzbuecher <mk@mkio.de>
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #undef UBX_DEBUG

@@ -4,7 +4,7 @@
 **Table of Contents**
 
 - [Block models](#block-models)
-    - [Generic Manipulator (`manipulator-dummy`)](#generic-manipulator-manipulator-dummy)
+    - [Generic Manipulator (`manipulator`)](#generic-manipulator-manipulator)
     - [Controllers](#controllers)
         - [PID (`pid`)](#pid-pid)
         - [Saturation (`saturation`)](#saturation-saturation)
@@ -33,7 +33,7 @@ ports and configurations are of course permitted depending on the
 block.
 
 
-### Generic Manipulator (`manipulator-dummy`)
+### Generic Manipulator (`manipulator`)
 
 A **generic manipulator** should conform to the following model. If
 one or more of the `ctrl_mode`s are not supported, the respective
@@ -130,7 +130,8 @@ This sections describes a number of reusable usc compositions. The
 follwing naming scheme is used:
 
 - `mix_` compositions are intended to be *mixed-in* on the command
-  line. They are usually not launchable standalone.
+  line as additional arguments to `-c`. They are usually not
+  launchable standalone.
 - `frag_` compositions are reusable application fragments that can be
   used as building blocks in applications. They may or may not be
   launchable standalone.
@@ -162,19 +163,19 @@ PID's output to safe values.
 
 ### `frag_jnt_vel`
 
-The [frag_jnt_vel](usrc/frag_jnt_vel.usc) composition extends
-`frag_pid_sat` with a velocity controlled robot manipulator and a
+The [frag_jnt_vel](usrc/frag_jnt_vel.usc) composition is based on
+`frag_pid_sat` and adds a velocity controlled robot manipulator and a
 schedule for executing the composition.
 
 **Configuration**
 
-- see `frag_pid_sat`
+- same as `frag_pid_sat`
 
 
 ### `app_jnt_vel`
 
 [app_jnt_vel](usc/app_jnt_vel.usc) customizes `frag_jnt_vel` (e.g. the
-saturation limits) and adds a manipulator (`manipulator-dummy`) block.
+saturation limits) and adds a manipulator (`manipulator`) block.
 
 
 **Usage**
@@ -210,7 +211,7 @@ With this, the error messages will stop.
 ### `app_jnt_moveto`
 
 [app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
-composition using `trajgen_rml` and the `manipulator-dummy` block. The
+composition using `trajgen_rml` and the `manipulator` block. The
 desired target `pos` and `vel` ports are exported via mqueues and can
 be sent from the command line using `ubx-mq`.
 

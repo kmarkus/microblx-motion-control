@@ -1,10 +1,14 @@
 /*
- * a robot manipulator skelleton function block
+ * an empty 7-DOF robot manipulator function block
  *
- * the purpose of this block is to serve as a starting point for real
- * robot driver blocks and to put down a recommended driver interface.
+ * Copyright (C) 2020 Markus Klotzbuecher <mk@mkio.de>
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * the purpose of this block is to specify a recommended driver
+ * interface and to serve as a starting point for real robot drivers.
  */
-#define UBX_DEBUG
+
+#undef UBX_DEBUG
 
 #include <ubx.h>
 
@@ -12,7 +16,8 @@
  * that will not be the case, so we don't bother with it here */
 #define NUM_JOINTS	7
 
-const char manipulator_block_name[] = "mc/manipulator-dummy";
+const char manipulator_block_name[] = "mc/manipulator";
+const char manipulator_meta[] = "a dummy 7-DOF robot manipulator block";
 
 enum CTRL_MODE {
 	POS = 0,
@@ -33,8 +38,6 @@ ubx_proto_config_t manipulator_config[] = {
 	{ .name="ctrl_mode", .type_name = "int", .min=1, .max=1, .doc="initial ctrl_mode: 0: pos, 1: vel, 2: eff, 3: cur" },
 	{ 0 },
 };
-
-const char manipulator_meta[] = "a dummy robotic manipulator block";
 
 ubx_proto_port_t manipulator_ports[] = {
 	{ .name="ctrl_mode", .in_type_name="int", .in_data_len=1, .doc="port to switch control mode at runtime" },
@@ -205,6 +208,6 @@ void manipulator_mod_cleanup(ubx_node_t *nd)
 	ubx_block_unregister(nd, manipulator_block_name);
 }
 
-UBX_MODULE_INIT(manipulator_mod_init)
-UBX_MODULE_CLEANUP(manipulator_mod_cleanup)
-UBX_MODULE_LICENSE_SPDX(BSD-3-Clause)
+UBX_MODULE_INIT(manipulator_mod_init);
+UBX_MODULE_CLEANUP(manipulator_mod_cleanup);
+UBX_MODULE_LICENSE_SPDX(BSD-3-Clause);
