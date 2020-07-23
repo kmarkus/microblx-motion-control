@@ -84,7 +84,7 @@ PID's output to safe values.
 
 ### `frag_jnt_vel`
 
-The [frag_jnt_vel](usrc/frag_jnt_vel.usc) composition is based on
+The [frag_jnt_vel](usc/frag_jnt_vel.usc) composition is based on
 `frag_pid_sat` and adds a velocity controlled robot manipulator and a
 schedule for executing the composition.
 
@@ -131,7 +131,7 @@ With this, the error messages will stop.
 
 ### `app_jnt_moveto`
 
-[app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
+[app_jnt_moveto](usc/app_jnt_moveto.usc) a small joint space "move-to"
 composition using `trajgen_rml` and the `manipulator` block. The
 desired target `pos` and `vel` ports are exported via mqueues and can
 be sent from the command line using `ubx-mq`.
