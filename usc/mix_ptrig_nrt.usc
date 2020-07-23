@@ -1,0 +1,30 @@
+-- -*- mode: lua; -*-
+
+-- set desired period here
+local USEC_PER_SEC = 1000^2
+
+-- calculate period in s and define as global config `period_sec` for
+-- potential users such as trajgen_rml
+local PERIOD_USEC = 100*1000
+local PERIOD_SEC = PERIOD_USEC / USEC_PER_SEC
+
+return bd.system {
+   imports = { "stdtypes", "ptrig" },
+
+   node_configurations = {
+      period_sec = { type = "double", config = PERIOD_SEC },
+   },
+
+   blocks = {
+      { name="ptrig", type="ubx/ptrig" },
+   },
+
+   configurations = {
+      { name="ptrig", config = {
+	   period = { sec=0, usec=PERIOD_USEC },
+	   tstats_mode = 1,
+	   tstats_profile_path="/tmp/",
+	   chain0 = { { b="#trig" } } }
+      },
+   }
+}

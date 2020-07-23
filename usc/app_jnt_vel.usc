@@ -1,0 +1,33 @@
+-- This small application composition exports the following ports of
+-- the app_pid_saturated.usc composition:
+--
+-- pid.des: desired velocity input
+-- sat.out: saturated controller output
+
+return bd.system {
+   imports = { "stdtypes", "mqueue" },
+
+   subsystems = {
+      bd.load("frag_jnt_vel.usc")
+   },
+
+   configurations = {
+      {
+	 name = "pid",
+	 config = { data_len = "&data_len", }
+      },
+      {
+	 name = "sat",
+	 config = {
+	    data_len = "&data_len",
+	    lower_limits = { -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1 },
+	    upper_limits = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	 }
+      },
+   },
+
+   connections = {
+      {	tgt="pid.des", type="ubx/mqueue" },
+      {	src="sat.out", type="ubx/mqueue" },
+   }
+}

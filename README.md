@@ -4,23 +4,26 @@
 **Table of Contents**
 
 - [Block models](#block-models)
-    - [Generic Manipulator](#generic-manipulator)
+    - [Generic Manipulator (`manipulator-dummy`)](#generic-manipulator-manipulator-dummy)
     - [Controllers](#controllers)
-        - [PID](#pid)
-        - [Saturation](#saturation)
-    - [Trajectory generator](#trajectory-generator)
+        - [PID (`pid`)](#pid-pid)
+        - [Saturation (`saturation`)](#saturation-saturation)
+    - [RML based joint space trajectory generator (`trajgen_rml`)](#rml-based-joint-space-trajectory-generator-trajgen_rml)
 - [Compositions](#compositions)
+    - [`mix_ptrig_nrt`](#mix_ptrig_nrt)
+    - [`frag_app_pid_sat`](#frag_app_pid_sat)
+    - [`app_jnt_pid_sat`](#app_jnt_pid_sat)
+    - [`app_jnt_moveto`](#app_jnt_moveto)
 - [References](#references)
 
 <!-- markdown-toc end -->
 
 This repo contains a set of generic, hardware independent microblx
-blocks as well as composable usc models. The [Block
+block models and blocks as well as composable usc models. The [Block
 models](#block-models) section describes relevant planned and
 available blocks. Section [Compositions](#compositions) describes
 generic and reusable composition models for building typical motion
 control systems using the former blocks.
-
 
 ## Block models
 
@@ -29,7 +32,7 @@ ports and configurations are of course permitted depending on the
 block.
 
 
-### Generic Manipulator
+### Generic Manipulator (`manipulator-dummy`)
 
 A **generic manipulator** should conform to the following model. If
 one or more of the `ctrl_mode`s are not supported, the respective
@@ -59,7 +62,7 @@ pairs of ports can be omitted.
 
 ### Controllers
 
-#### PID
+#### PID (`pid`)
 
 [PID](https://microblx.readthedocs.io/en/latest/block_index.html#module-pid)
 is a generic microblx block that can be used for joinspace control.
@@ -79,7 +82,7 @@ is a generic microblx block that can be used for joinspace control.
 - out [out, `double`]: *controller output*
 
 
-#### Saturation
+#### Saturation (`saturation`)
 
 *Status*: *available*
 
@@ -97,7 +100,7 @@ controller such as the PID.
 - `out` [out, `double`]: *saturated output signal*
 
 
-### trajgen_rml: RML based joint space trajectory generator
+### RML based joint space trajectory generator (`trajgen_rml`)
 
 *Status* *available*
 
@@ -122,24 +125,90 @@ to use block that is useful for free space motion in joint space.
 
 ## Compositions
 
-Based on the above blocks, the following compositions are available:
 
-- [ptrig_nrt](usc/ptrig_nrt.usc) a ptrig mixin model to avoid
-  cluttering the application with platform specifics. Typically passed
-  as a second usc model on the command-line to `ubx-launch`
 
-- [pid_saturated](usc/pid_saturated.usc) is a small composition
-  of a PID controller and a saturation block to constraint the PID's
-  output to safe values.
+The naming scheme is as follows:
 
-- [app_jnt_pid](usc/app_jnt_vel.usc) a small composition based on
-  `pid_saturated` and the `manipulator-dummy` block.
+- `mix_` compositions are supporting compositions to be *mixed-in* on
+  the command line. They are usually not launchable standalone.
+- `frag_` compositions are reusable, launchable application fragments
+  that can be used to build applications. They may or may not be
+  launchable standalone.
+- `app_` compositions compose `frag_` compositions to build
+  applications. They are launchable standalone.
 
-- [app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
-  composition using `trajgen_rml` and the `manipulator-dummy`
-  block. The desired target `pos` and `vel` ports are exported via
-  mqueues and can be sent from the command line using `ubx-mq`. See
-  the comment in the usc file.
+### `mix_ptrig_nrt`
+
+[mix_ptrig_nrt](usc/mix_ptrig_nrt.usc) is a mixin model for late addition
+of a pthread trigger to avoid cluttering the application with platform
+specifics.
+
+### `frag_pid_sat`
+
+[frag_pid_sat](usc/frag_pid_sat.usc) is a small composition of a PID
+controller and a saturation block with the purpose of constraining the
+PID's output to safe values.
+
+**Configuration**
+
+- global: `data_len`: default 1, must be set to the required data
+  dimension
+  
+- `sat`
+   - `lower_limits`: saturation lower limits, array of `data_len`
+   - `upper_limits`: saturation upper limits, array of `data_len`
+
+### `frag_jnt_vel`
+
+The [frag_jnt_vel](usrc/frag_jnt_vel.usc) composition extends
+`frag_pid_sat` with a velocity controlled robot manipulator and a
+schedule for executing the composition.
+
+### `app_jnt_vel`
+
+[app_jnt_vel](usc/app_jnt_vel.usc) a small composition based
+on `pid_saturated` and the `manipulator-dummy` block.
+
+
+
+### `app_jnt_moveto`
+
+[app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
+composition using `trajgen_rml` and the `manipulator-dummy` block. The
+desired target `pos` and `vel` ports are exported via mqueues and can
+be sent from the command line using `ubx-mq`. See the comment in the
+usc file.
+
+**Configuration**
+
+- global: `data_len` defaults to 7 and can be changed based on the
+  robot used.
+
+
+**Example**
+
+Reuse the composition with a 5-DOf manipulator:
+
+```Lua
+return bd.system {
+   -- set the array dimension to 5
+   node_configurations = {
+      data_len = { type = "long", config = 5 },
+   },
+
+   -- merge the composition
+   subsystems = {
+      bd.load("app_jnt_moveto.usc")
+   },
+
+   -- override the arm block
+   blocks = {
+      { name = "arm", type="mc/robotXY" },
+   }
+   ...
+}
+```
+
 
 References
 ----------

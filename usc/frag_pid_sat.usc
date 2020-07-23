@@ -1,0 +1,57 @@
+--
+-- saturated pid controller
+--
+-- This simple composition defines a saturated pid controller
+--
+-- Configuration:
+--  - node_configurations (i.e. global): data_len
+--  - sat: lower_limits, upper limits
+--  - pid: Kp, Ki, Kd
+--
+-- Ports:
+--   - pid.msr: measured signal [in]
+--   - pid.des: desired signal [in]
+--   - sat.out: saturated controller output [out]
+--
+
+return bd.system {
+   imports = {
+      "stdtypes",
+      "lfds_cyclic",
+      "pid",
+      "saturation_double"
+   },
+
+   -- This global configuration of the data dimension can and should
+   -- be reconfigured by parent compositions
+   node_configurations = {
+      data_len = { type = "long", config = 1 },
+   },
+
+   blocks = {
+      { name = "pid", type = "ubx/pid" },
+      { name = "sat", type = "ubx/saturation_double"},
+   },
+
+   configurations = {
+      {
+	 name = "pid",
+	 config = {
+	    data_len = "&data_len",
+	 }
+      },
+      {
+	 name = "sat",
+	 config = {
+	    data_len = "&data_len",
+	    lower_limits = 0,
+	    upper_limits = 0,
+	 }
+      },
+   },
+
+   connections = {
+      { src = "pid.out", tgt = "sat.in" }
+   }
+
+}

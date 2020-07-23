@@ -1,0 +1,42 @@
+-- This example extends the pid_saturated composition to build a dummy
+-- controller
+
+return bd.system {
+   imports = {
+      "stdtypes", "trajgen_rml", "mqueue",
+   },
+
+   node_configurations = {
+      data_len = { type = "long", config = 5 },
+   },
+
+   blocks = {
+      { name = "trajgen", type="mc/trajgen_rml" },
+   },
+
+   configurations = {
+      {
+	 name = "trajgen",
+	 config = {
+	    loglevel = 6,
+	    data_len = "&data_len",
+	    max_vel = { 0.3, 0.3, 0.3, 0.3, 0.3 },
+	    max_acc = { 0.5, 0.5, 0.5, 0.5, 0.5 },
+	    cycle_time = 0.1 -- 10Hz
+	 },
+      },
+   },
+
+   connections = {
+      -- export signals for testing
+      { tgt = "trajgen.pos_des", type = "ubx/mqueue" },
+      { tgt = "trajgen.vel_des", type = "ubx/mqueue" },
+
+      { tgt = "trajgen.pos_msr", type = "ubx/mqueue" },
+      { tgt = "trajgen.vel_msr", type = "ubx/mqueue" },
+
+      { src = "trajgen.pos_cmd", type = "ubx/mqueue" },
+      { src = "trajgen.vel_cmd", type = "ubx/mqueue" },
+      { src = "trajgen.reached", type = "ubx/mqueue" },
+   }
+}

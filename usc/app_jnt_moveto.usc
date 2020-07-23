@@ -1,0 +1,79 @@
+-- simple demo composition using the trajgen_rml trajectory generator
+--
+-- this usc exports the desired position and velocity inputs via a
+-- mqueue, so "move to" and "move vel" commands can be sent as
+-- follows:
+--
+-- ubx-mq write trajgen.pos_des '{ a1, a2, a3, a4, a5, a6, a7 }'
+-- ubx-mq write trajgen.vel_des '{ a1, a2, a3, a4, a5, a6, a7 }'
+--
+-- This composition contains no activity itself and requires
+-- triggering of the schedule `trig`. Moreover, it expects a global
+-- configuration `period_sec".
+--
+-- The model "ptrig_nrt.usc" satisfies these requirements, and can be
+-- added on the command-line when launching. The following command
+-- shows that:
+--
+-- $ ubx-launch -v -c app_jnt_moveto.usc,ptrig_nrt.usc
+--
+
+return bd.system {
+
+   imports = {
+      "stdtypes",
+      "lfds_cyclic",
+      "mqueue",
+      "manipulator",
+      "trig",
+      "trajgen_rml"
+   },
+
+   node_configurations = {
+      data_len = { type = "long", config = 7 },
+   },
+
+   blocks = {
+      { name = "arm", type="mc/manipulator-dummy" },
+      { name = "trajgen", type="mc/trajgen_rml" },
+      { name = "trig", type="ubx/trig" },
+   },
+
+   configurations = {
+      {
+	 name = "arm",
+	 config = { ctrl_mode = 1 }
+      },
+      {
+	 name = "trajgen",
+	 config = {
+	    data_len = "&data_len",
+	    cycle_time = "&period_sec",
+	    max_vel = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	    max_acc = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	 }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#arm" },
+	       { b = "#trajgen" },
+	    }
+	 },
+      },
+   },
+
+   connections = {
+      {	src="arm.pos_msr", tgt="trajgen.pos_msr" },
+      {	src="arm.vel_msr", tgt="trajgen.vel_msr" },
+      {	src="trajgen.vel_cmd", tgt="arm.vel_cmd", config={loglevel_overruns=7}},
+
+      -- export desired velocity
+      {	tgt="trajgen.pos_des", type="ubx/mqueue" },
+      {	tgt="trajgen.vel_des", type="ubx/mqueue" },
+
+      -- for debugging
+      {	src="trajgen.vel_cmd", type="ubx/mqueue" },
+   }
+}

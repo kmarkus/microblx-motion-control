@@ -10,7 +10,7 @@
 
 /* of course this could be made configurable, but for any real robot
  * that will not be the case, so we don't bother with it here */
-#define NUM_JOINTS 	7
+#define NUM_JOINTS	7
 
 const char manipulator_block_name[] = "mc/manipulator-dummy";
 
@@ -66,6 +66,9 @@ struct manipulator_info
 	} ports;
 
 	double pos[NUM_JOINTS];
+	double vel[NUM_JOINTS];
+	double eff[NUM_JOINTS];
+	double cur[NUM_JOINTS];
 };
 
 int manipulator_init(ubx_block_t *b)
@@ -119,7 +122,7 @@ out:
 int manipulator_start(ubx_block_t *b)
 {
 	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-        ubx_info(b, "%s", __func__);
+	ubx_info(b, "%s", __func__);
 	int ret = 0;
 	return ret;
 }
@@ -128,14 +131,14 @@ int manipulator_start(ubx_block_t *b)
 void manipulator_stop(ubx_block_t *b)
 {
 	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-        ubx_info(b, "%s", __func__);
+	ubx_info(b, "%s", __func__);
 }
 
 /* cleanup */
 void manipulator_cleanup(ubx_block_t *b)
 {
 	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-        ubx_info(b, "%s", __func__);
+	ubx_info(b, "%s", __func__);
 	free(b->private_data);
 }
 
@@ -162,9 +165,18 @@ void manipulator_step(ubx_block_t *b)
 		}
 	}
 cont:
-	/* ideal manipulator: pos_cmd is pos_msr */
-	len = read_double_array(inf->ports.pos_cmd, inf->pos, NUM_JOINTS);
-	write_double_array(inf->ports.pos_msr,	inf->pos, NUM_JOINTS);
+	/* ideal manipulator: cmd is msr */
+	read_double_array(inf->ports.pos_cmd, inf->pos, NUM_JOINTS);
+	write_double_array(inf->ports.pos_msr, inf->pos, NUM_JOINTS);
+
+	read_double_array(inf->ports.vel_cmd, inf->vel, NUM_JOINTS);
+	write_double_array(inf->ports.vel_msr, inf->vel, NUM_JOINTS);
+
+	read_double_array(inf->ports.eff_cmd, inf->eff, NUM_JOINTS);
+	write_double_array(inf->ports.eff_msr, inf->eff, NUM_JOINTS);
+
+	read_double_array(inf->ports.cur_cmd, inf->cur, NUM_JOINTS);
+	write_double_array(inf->ports.cur_msr, inf->cur, NUM_JOINTS);
 
 	return;
 }

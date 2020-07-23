@@ -1,0 +1,47 @@
+-- This composition extends frag_pid_sat with a velocity controlle
+-- robot manipulator and a trigger to form a small control system
+
+return bd.system {
+
+   imports = {
+      "mqueue",
+      "manipulator",
+      "trig",
+   },
+
+   node_configurations = {
+      data_len = { type = "long", config = 7 },
+   },
+
+   subsystems = {
+      -- include without namespace, i.e. merge
+      bd.load("frag_pid_sat.usc")
+   },
+
+   blocks = {
+      { name = "arm", type="mc/manipulator-dummy" },
+      { name = "trig", type="ubx/trig" },
+   },
+
+   configurations = {
+      {
+	 name = "arm",
+	 config = { ctrl_mode = 1 }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#arm" },
+	       { b = "#pid" },
+	       { b = "#sat" },
+	    }
+	 },
+      },
+   },
+
+   connections = {
+      {	src="arm.vel_msr", tgt="pid.msr" },
+      {	src="sat.out", tgt="arm.vel_cmd" },
+   }
+}
