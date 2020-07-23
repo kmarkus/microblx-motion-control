@@ -11,8 +11,9 @@
     - [RML based joint space trajectory generator (`trajgen_rml`)](#rml-based-joint-space-trajectory-generator-trajgen_rml)
 - [Compositions](#compositions)
     - [`mix_ptrig_nrt`](#mix_ptrig_nrt)
-    - [`frag_app_pid_sat`](#frag_app_pid_sat)
-    - [`app_jnt_pid_sat`](#app_jnt_pid_sat)
+    - [`frag_pid_sat`](#frag_pid_sat)
+    - [`frag_jnt_vel`](#frag_jnt_vel)
+    - [`app_jnt_vel`](#app_jnt_vel)
     - [`app_jnt_moveto`](#app_jnt_moveto)
 - [References](#references)
 
@@ -125,17 +126,18 @@ to use block that is useful for free space motion in joint space.
 
 ## Compositions
 
+This sections describes a number of reusable usc compositions. The
+follwing naming scheme is used:
 
-
-The naming scheme is as follows:
-
-- `mix_` compositions are supporting compositions to be *mixed-in* on
-  the command line. They are usually not launchable standalone.
-- `frag_` compositions are reusable, launchable application fragments
-  that can be used to build applications. They may or may not be
+- `mix_` compositions are intended to be *mixed-in* on the command
+  line. They are usually not launchable standalone.
+- `frag_` compositions are reusable application fragments that can be
+  used as building blocks in applications. They may or may not be
   launchable standalone.
 - `app_` compositions compose `frag_` compositions to build
   applications. They are launchable standalone.
+
+Note that these rules are not enforced in any way.
 
 ### `mix_ptrig_nrt`
 
@@ -164,30 +166,89 @@ The [frag_jnt_vel](usrc/frag_jnt_vel.usc) composition extends
 `frag_pid_sat` with a velocity controlled robot manipulator and a
 schedule for executing the composition.
 
+**Configuration**
+
+- see `frag_pid_sat`
+
+
 ### `app_jnt_vel`
 
-[app_jnt_vel](usc/app_jnt_vel.usc) a small composition based
-on `pid_saturated` and the `manipulator-dummy` block.
+[app_jnt_vel](usc/app_jnt_vel.usc) customizes `frag_jnt_vel` (e.g. the
+saturation limits) and adds a manipulator (`manipulator-dummy`) block.
 
 
+**Usage**
+
+This composition can be launched as follows:
+
+```bash
+$ ubx-launch -webif -v -c app_jnt_vel.usc,mix_ptrig_nrt.usc
+...
+```
+
+Note: the `ubx-log` output will repeatedly show the following error
+messgage `pid ERROR: ENODATA: no data on port des`. This is because
+the PID expects a desired value on it's `des` port every
+cycle. As this port is exported via a message queue:
+
+```bash
+$ ubx-mq list
+   mq id    type name  array len  type hash
+1  sat.out  double     7          e8cd7da078a86726031ad64f35f5a6c0
+2  pid.des  double     7          e8cd7da078a86726031ad64f35f5a6c0
+```
+
+a value can be sent (`-r 0.1` sends the value at 10Hz, which is the
+configured ptrig period):
+
+```
+$ ubx-mq write pid.des '{0,0.1,0.1,0.1,0.1,0}'  -r 0.1
+```
+
+With this, the error messages will stop.
 
 ### `app_jnt_moveto`
 
 [app_jnt_moveto](app_jnt_moveto.usc) a small joint space "move-to"
 composition using `trajgen_rml` and the `manipulator-dummy` block. The
 desired target `pos` and `vel` ports are exported via mqueues and can
-be sent from the command line using `ubx-mq`. See the comment in the
-usc file.
+be sent from the command line using `ubx-mq`.
 
 **Configuration**
 
 - global: `data_len` defaults to 7 and can be changed based on the
   robot used.
+  
+**Usage**
+
+Lauching the composition:
+
+```bash
+$ ubx-launch -v -c app_jnt_moveto.usc,ptrig_nrt.usc
+...
+```
+
+Show the current output of the `trajgen` block
+
+```bash
+$ ubx-mq read trajgen.vel_cmd
+{0,0,0,0,0,0,0}
+{0,0,0,0,0,0,0}
+...
+```
+
+Send a velocity or position setpoint:
+
+```bash
+$ ubx-mq write trajgen.pos_des '{1,1,1,1,1,1,1 }' 
+```
+
+... and `trajgen.vel_cmd` values should start changing.
 
 
-**Example**
+**Customization Example**
 
-Reuse the composition with a 5-DOf manipulator:
+To reuse the `app_jnt_moveto` composition with a 5-DOF manipulator:
 
 ```Lua
 return bd.system {
