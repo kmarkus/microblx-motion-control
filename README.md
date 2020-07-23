@@ -3,12 +3,8 @@
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [Block models](#block-models)
-    - [Generic Manipulator (`manipulator`)](#generic-manipulator-manipulator)
-    - [Controllers](#controllers)
-        - [PID (`pid`)](#pid-pid)
-        - [Saturation (`saturation`)](#saturation-saturation)
-    - [RML based joint space trajectory generator (`trajgen_rml`)](#rml-based-joint-space-trajectory-generator-trajgen_rml)
+- [Installation](#installation)
+- [Block Index](#block-index)
 - [Compositions](#compositions)
     - [`mix_ptrig_nrt`](#mix_ptrig_nrt)
     - [`frag_pid_sat`](#frag_pid_sat)
@@ -46,7 +42,7 @@ $ make
 $ sudo make install
 ```
 
-## Blocks
+## Block Index
 
 | Name        | Description                             | Status              | Where                                                                                           |
 |-------------|-----------------------------------------|---------------------|-------------------------------------------------------------------------------------------------|
