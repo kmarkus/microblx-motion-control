@@ -26,103 +26,24 @@ available blocks. Section [Compositions](#compositions) describes
 generic and reusable composition models for building typical motion
 control systems using the former blocks.
 
-## Block models
+## Installation
 
-The specified interfaces are the minimum required API. Additional
-ports and configurations are of course permitted depending on the
-block.
+Dependencies are 
 
+- microblx v0.9 or newer
+- for the `trajgen_rml` block the reflexxes library is required. It
+  was tested with [this](https://github.com/kschwan/RMLTypeII)
+  version.
 
-### Generic Manipulator (`manipulator`)
+## Blocks
 
-A **generic manipulator** should conform to the following model. If
-one or more of the `ctrl_mode`s are not supported, the respective
-pairs of ports can be omitted.
+| Name        | Description                             | Status              | Where                                                                                           |
+|-------------|-----------------------------------------|---------------------|-------------------------------------------------------------------------------------------------|
+| manipulator | a robotic manipulator dummy block       | skelleton available | [this repo](src/manipulator/manipulator.md)                                                     |
+| pid         | pid controller block                    | available           | [microblx](https://microblx.readthedocs.io/en/latest/block_index.html#module-pid)               |
+| saturation  | generic saturation block                | available           | [microblx](https://microblx.readthedocs.io/en/latest/block_index.html#module-saturation-double) |
+| trajgen_rml | libreflexxes based trajectory generator | available           | [this repo](src/trajgen_rml/trajgen_rml.md)                                                     |
 
-**Status**: skelleton block available
-
-**Configs**
-
-- ctrl_mode [`int`]: *initial control mode to use*
-  - `0`: position
-  - `1`: velocity
-  - `2`: effort
-  - `3`: current
-
-**Ports**
-
-- ctrl_mode [in, `int`]: *port to switch control modes at runtime*
-- pos_msr [out, `double`]: *measured position [rad]*
-- pos_cmd [in, `double`]: *commanded joint position [rad]*
-- vel_msr [out, `double`]: *measured velocity [m/s]*
-- vel_cmd [in, `double`]: *commanded jnt velocity [rad/s]*
-- eff_msr [out, `double`]: *measured effort [N or Nm]*
-- eff_cmd [in, `double`]: *commanded jnt effort [N or Nm]*
-- cur_msr [out, `double`]: *measured current [A]*
-- cur_cmd [in, `double`]: *commanded jnt current [A]*
-
-### Controllers
-
-#### PID (`pid`)
-
-[PID](https://microblx.readthedocs.io/en/latest/block_index.html#module-pid)
-is a generic microblx block that can be used for joinspace control.
-
-*Status*: *available*
-
-**Configs**
-
-- data_len [long] length of input signal
-- Kp [double]: *P-gain (def: 0)*
-- Ki [double]: *I-gain (def: 0)*
-- Kd [double]: *D-gain (def: 0)*
-
-**Ports**
-- msr [in, `double`]: *measured input signal*
-- des [in, `double`]: *desired input signal*
-- out [out, `double`]: *controller output*
-
-
-#### Saturation (`saturation`)
-
-*Status*: *available*
-
-[saturation](https://microblx.readthedocs.io/en/latest/block_index.html#module-saturation-double)
-is a generic microblx block that can be used to limit the output of a
-controller such as the PID.
-
-**Configs**
-- `data_len` [`long`]: *data array length*
-- `lower_limits` [`double`]: *saturation lower limits*
-- `upper_limits` [`double`]: *saturation upper limits*
- 
-**Ports**
-- `in` [in, `double`]: *input signal to saturate*
-- `out` [out, `double`]: *saturated output signal*
-
-
-### RML based joint space trajectory generator (`trajgen_rml`)
-
-*Status* *available*
-
-This block is based on the [reflexxes motion
-library](https://github.com/kschwan/RMLTypeII) and provides a simple
-to use block that is useful for free space motion in joint space.
-
-**Configs**
-- data_len [`long`]: *data array length*
-- max_vel [`long`]: *maximum velocity*
-- max_acc [`long`]: *maximum acceleration*
-
-**Ports**
-- pos_msr [in, `long`]: *measured position*
-- vel_msr [in, `long`]: *measured velocity*
-- des_pos [in, `long`]: *desired target position*
-- des_vel [in, `long`]: *desired target velocity*
-- pos_cmd [out, `long`]: *commanded position*
-- vel_cmd [out, `long`]: *commanded velocity*
-- acc_cmd [out, `long`]: *commanded acceleration*
-- reached [out, `int`]: *the final state has been reached*
 
 ## Compositions
 
