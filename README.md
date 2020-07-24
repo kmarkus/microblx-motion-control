@@ -139,10 +139,10 @@ With this, the error messages will stop.
 ### `app_jnt_moveto`
 
 
-[app_jnt_moveto](usc/app_jnt_moveto.usc) a small joint space "move-to"
-composition using `trajgen_rml` and the `manipulator` block. The
-desired target `pos` and `vel` ports are exported via mqueues and can
-be sent from the command line using `ubx-mq`.
+[app_jnt_moveto](usc/app_jnt_moveto.usc) is a small joint space
+"move-to" composition using `trajgen_rml` and the `manipulator`
+block. The desired target `pos` and `vel` ports are exported via
+mqueues and can be sent from the command line using `ubx-mq`.
 
 **Configuration**
 
@@ -200,6 +200,8 @@ return bd.system {
 }
 ```
 
+Note that `usc` being a declarative DSL, the order of declarations is
+irrelevant,
 
 References
 ----------
