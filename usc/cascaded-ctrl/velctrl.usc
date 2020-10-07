@@ -1,0 +1,54 @@
+-- Simple Velocity Controller
+
+return bd.system {
+
+   imports = {
+      "stdtypes",
+      "lfds_cyclic",
+      "pid",
+      "manipulator",
+      "trig",
+   },
+
+   node_configurations = {
+      -- This global configuration defines the data-dimension,
+      -- i.e. DOFs of the involved blocks. Defaults to 7, but can be
+      -- overriden in parent compositions.
+      data_len = { type = "long", config = 7 },
+   },
+
+   blocks = {
+      { name = "velctrl", type="ubx/pid" },
+      { name = "arm", type="mc/manipulator" },
+      { name = "trig", type="ubx/trig" },
+   },
+
+   configurations = {
+      {
+	 name = "velctrl",
+	 config = {
+	    data_len = "&data_len",
+	    Kp = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	 }
+      },
+      {
+	 name = "arm",
+	 config = { ctrl_mode = 2 }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#arm" },
+	       { b = "#velctrl" },
+	    }
+	 },
+      },
+   },
+
+   connections = {
+      -- inner velocity loop
+      {	src="arm.vel_msr", tgt="velctrl.msr" },
+      {	src="velctrl.out", tgt="arm.eff_cmd" },
+   }
+}

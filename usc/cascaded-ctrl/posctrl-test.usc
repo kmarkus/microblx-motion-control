@@ -1,0 +1,28 @@
+-- Test overlay for the posctrl composition which exports a number of
+-- ports via mqueues
+
+return bd.system {
+
+   imports = {
+      "stdtypes",
+      "mqueue",
+   },
+
+   node_configurations = {
+      -- This global configuration defines the data-dimension,
+      -- i.e. DOFs of the involved blocks.
+      data_len = { type = "long", config = 7 },
+   },
+
+   subsystems = {
+      bd.load("posctrl.usc"),
+   },
+
+
+   connections = {
+      -- exported for testing / debugging
+      { tgt="posctrl.des", type="ubx/mqueue" },
+      { src="posctrl.out", type="ubx/mqueue" },
+      { src="velctrl.out", type="ubx/mqueue" },
+   }
+}

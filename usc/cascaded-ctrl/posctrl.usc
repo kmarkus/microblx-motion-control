@@ -1,0 +1,52 @@
+-- Cascaded position control
+
+return bd.system {
+
+   imports = {
+      "stdtypes",
+      "pid",
+   },
+
+   node_configurations = {
+      -- the following could be omitted, since this global config has
+      -- also been defined also in the subsystem, however it is
+      -- recommended to keep it to avoid a change in the subsystem
+      -- default to affect this level.
+      data_len = { type = "long", config = 7 },
+   },
+
+   subsystems = {
+      bd.load("velctrl.usc"),
+   },
+
+   blocks = {
+      { name = "posctrl", type="ubx/pid" },
+   },
+
+   configurations = {
+      {
+	 name = "posctrl",
+	 config = {
+	    data_len = "&data_len",
+	    Kp = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	    Ki = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	 }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#arm" },
+	       { b = "#velctrl", every=10 },
+	       { b = "#posctrl", every=10 },
+	    }
+	 },
+      },
+   },
+
+   connections = {
+      -- outer position loop
+      {	src="arm.pos_msr", tgt="posctrl.msr" },
+      {	src="posctrl.out", tgt="velctrl.des" },
+   }
+}
