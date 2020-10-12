@@ -11,6 +11,11 @@ pkg_check_modules(UBX REQUIRED ubx0>=0.9.0)
 pkg_get_variable(UBX_MODDIR ubx0 UBX_MODDIR)
 find_program(TOCARR ubx-tocarr)
 
+pkg_check_modules(KDL orocos-kdl>=1.4.0)
+pkg_check_modules(KDL_PARSER kdl_parser>=1.14.1)
+pkg_check_modules(KDL_CONV kdl_conversions)
+pkg_check_modules(UBXKDL ubxkdl)
+
 # manipulator
 add_library(manipulator SHARED src/manipulator/manipulator.c)
 set_target_properties(manipulator PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE PREFIX "")
@@ -45,3 +50,13 @@ if ("${LIBRML_FOUND}")
   target_link_libraries(trajgen_rml ${UBX_LDFLAGS} ${RML_LIB})
   install(TARGETS trajgen_rml DESTINATION ${UBX_MODDIR})
 endif()
+
+# manipulator
+add_library(fwkin SHARED src/fwkin/fwkin.cpp)
+target_link_libraries(fwkin ${UBX_LDFLAGS} ${KDL_LDFLAGS} ${KDL_PARSER_LDFLAGS})
+set_target_properties(fwkin PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE PREFIX "")
+target_compile_options(fwkin PUBLIC
+  ${UBX_CFLAGS} ${KDL_CFLAGS}
+  -Wno-missing-field-initializers
+  -fvisibility=hidden)
+install(TARGETS fwkin DESTINATION ${UBX_MODDIR})
