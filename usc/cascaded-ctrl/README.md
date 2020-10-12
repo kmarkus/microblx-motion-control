@@ -1,5 +1,7 @@
 # Cascaded controllers
 
+## Motivation
+
 The following two compositions implement two variants of a position
 controller. The first uses the manipulators built-in velocity
 controller, whereas the second realizes the position controller as
