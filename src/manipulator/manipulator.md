@@ -15,14 +15,14 @@ A **manipulator** shall conform to the following model.
 | Name      | Direction | Type     | Description                               |
 |-----------|-----------|----------|-------------------------------------------|
 | ctrl_mode | in        | `int`    | *port to switch control modes at runtime* |
-| pos_msr   | out       | `double` | *measured position [rad]*                 |
-| pos_cmd   | in        | `double` | *commanded joint position [rad]*          |
-| vel_msr   | out       | `double` | *measured velocity [m/s]*                 |
-| vel_cmd   | in        | `double` | *commanded jnt velocity [rad/s]*          |
-| eff_msr   | out       | `double` | *measured effort [N or Nm]*               |
-| eff_cmd   | in        | `double` | *commanded jnt effort [N or Nm]*          |
-| cur_msr   | out       | `double` | *measured current [A]*                    |
-| cur_cmd   | in        | `double` | *commanded jnt current [A]*               |
+| jnt_pos_msr   | out       | `double` | *measured position [rad]*                 |
+| jnt_pos_cmd   | in        | `double` | *commanded joint position [rad]*          |
+| jnt_vel_msr   | out       | `double` | *measured velocity [m/s]*                 |
+| jnt_vel_cmd   | in        | `double` | *commanded jnt velocity [rad/s]*          |
+| jnt_eff_msr   | out       | `double` | *measured effort [N or Nm]*               |
+| jnt_eff_cmd   | in        | `double` | *commanded jnt effort [N or Nm]*          |
+| jnt_cur_msr   | out       | `double` | *measured current [A]*                    |
+| jnt_cur_cmd   | in        | `double` | *commanded jnt current [A]*               |
 
 
 **Notes** 

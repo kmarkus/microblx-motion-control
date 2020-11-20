@@ -41,14 +41,14 @@ ubx_proto_config_t manipulator_config[] = {
 
 ubx_proto_port_t manipulator_ports[] = {
 	{ .name="ctrl_mode", .in_type_name="int", .in_data_len=1, .doc="port to switch control mode at runtime" },
-	{ .name="pos_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured position [rad]" },
-	{ .name="pos_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded joint position [rad]" },
-	{ .name="vel_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured velocity [m/s]" },
-	{ .name="vel_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt velocity [rad/s]" },
-	{ .name="eff_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured effort [N or Nm]" },
-	{ .name="eff_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt effort [N or Nm]" },
-	{ .name="cur_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured current [A]" },
-	{ .name="cur_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt current [A]" },
+	{ .name="jnt_pos_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured position [rad]" },
+	{ .name="jnt_pos_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded joint position [rad]" },
+	{ .name="jnt_vel_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured velocity [m/s]" },
+	{ .name="jnt_vel_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt velocity [rad/s]" },
+	{ .name="jnt_eff_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured effort [N or Nm]" },
+	{ .name="jnt_eff_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt effort [N or Nm]" },
+	{ .name="jnt_cur_msr", .out_type_name="double", .out_data_len=NUM_JOINTS, .doc="measured current [A]" },
+	{ .name="jnt_cur_cmd", .in_type_name="double", .in_data_len=NUM_JOINTS, .doc="commanded jnt current [A]" },
 	{ 0 },
 };
 
@@ -58,14 +58,14 @@ struct manipulator_info
 
 	struct port_cache {
 		ubx_port_t* ctrl_mode;
-		ubx_port_t* pos_msr;
-		ubx_port_t* pos_cmd;
-		ubx_port_t* vel_msr;
-		ubx_port_t* vel_cmd;
-		ubx_port_t* eff_msr;
-		ubx_port_t* eff_cmd;
-		ubx_port_t* cur_msr;
-		ubx_port_t* cur_cmd;
+		ubx_port_t* jnt_pos_msr;
+		ubx_port_t* jnt_pos_cmd;
+		ubx_port_t* jnt_vel_msr;
+		ubx_port_t* jnt_vel_cmd;
+		ubx_port_t* jnt_eff_msr;
+		ubx_port_t* jnt_eff_cmd;
+		ubx_port_t* jnt_cur_msr;
+		ubx_port_t* jnt_cur_cmd;
 	} ports;
 
 	double pos[NUM_JOINTS];
@@ -103,14 +103,14 @@ int manipulator_init(ubx_block_t *b)
 
 	/* cache ports */
 	inf->ports.ctrl_mode = ubx_port_get(b, "ctrl_mode");
-	inf->ports.pos_msr = ubx_port_get(b, "pos_msr");
-	inf->ports.pos_cmd = ubx_port_get(b, "pos_cmd");
-	inf->ports.vel_msr = ubx_port_get(b, "vel_msr");
-	inf->ports.vel_cmd = ubx_port_get(b, "vel_cmd");
-	inf->ports.eff_msr = ubx_port_get(b, "eff_msr");
-	inf->ports.eff_cmd = ubx_port_get(b, "eff_cmd");
-	inf->ports.cur_msr = ubx_port_get(b, "cur_msr");
-	inf->ports.cur_cmd = ubx_port_get(b, "cur_cmd");
+	inf->ports.jnt_pos_msr = ubx_port_get(b, "jnt_pos_msr");
+	inf->ports.jnt_pos_cmd = ubx_port_get(b, "jnt_pos_cmd");
+	inf->ports.jnt_vel_msr = ubx_port_get(b, "jnt_vel_msr");
+	inf->ports.jnt_vel_cmd = ubx_port_get(b, "jnt_vel_cmd");
+	inf->ports.jnt_eff_msr = ubx_port_get(b, "jnt_eff_msr");
+	inf->ports.jnt_eff_cmd = ubx_port_get(b, "jnt_eff_cmd");
+	inf->ports.jnt_cur_msr = ubx_port_get(b, "jnt_cur_msr");
+	inf->ports.jnt_cur_cmd = ubx_port_get(b, "jnt_cur_cmd");
 
 	return 0;
 
@@ -170,17 +170,17 @@ void manipulator_step(ubx_block_t *b)
 	}
 cont:
 	/* ideal manipulator: cmd is msr */
-	read_double_array(inf->ports.pos_cmd, inf->pos, NUM_JOINTS);
-	write_double_array(inf->ports.pos_msr, inf->pos, NUM_JOINTS);
+	read_double_array(inf->ports.jnt_pos_cmd, inf->pos, NUM_JOINTS);
+	write_double_array(inf->ports.jnt_pos_msr, inf->pos, NUM_JOINTS);
 
-	read_double_array(inf->ports.vel_cmd, inf->vel, NUM_JOINTS);
-	write_double_array(inf->ports.vel_msr, inf->vel, NUM_JOINTS);
+	read_double_array(inf->ports.jnt_vel_cmd, inf->vel, NUM_JOINTS);
+	write_double_array(inf->ports.jnt_vel_msr, inf->vel, NUM_JOINTS);
 
-	read_double_array(inf->ports.eff_cmd, inf->eff, NUM_JOINTS);
-	write_double_array(inf->ports.eff_msr, inf->eff, NUM_JOINTS);
+	read_double_array(inf->ports.jnt_eff_cmd, inf->eff, NUM_JOINTS);
+	write_double_array(inf->ports.jnt_eff_msr, inf->eff, NUM_JOINTS);
 
-	read_double_array(inf->ports.cur_cmd, inf->cur, NUM_JOINTS);
-	write_double_array(inf->ports.cur_msr, inf->cur, NUM_JOINTS);
+	read_double_array(inf->ports.jnt_cur_cmd, inf->cur, NUM_JOINTS);
+	write_double_array(inf->ports.jnt_cur_msr, inf->cur, NUM_JOINTS);
 
 	return;
 }
