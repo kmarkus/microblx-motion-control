@@ -1,12 +1,7 @@
-# Cascaded controllers
+# Cascaded controller Application
 
-## Motivation
-
-The following two compositions implement two variants of a position
-controller. The first uses the manipulators built-in velocity
-controller, whereas the second realizes the position controller as
-cascaded position - velocity controller on top of the manipulators
-built-in effort controller.
+This example illustrates the composition extensions of the microblx
+launch DSL. The examples builds different variants of
 
 Both compositions use the dummy `manipulator` block and are launchable
 (instruction below). For debugging and testing, the position
@@ -16,7 +11,7 @@ a message queue.
 **Notes:**
 
 - As both compositions only specify their schedule with a passive
-`trig` blcok, it is necessary to mix-in an active trigger
+`trig` block, it is necessary to mix-in an active trigger
 (e.g. [mix_ptrig_nrt.usc](../mix_ptrig_nrt.usc)).
 - Run `ubx-log` in a separate terminal to see log messages.
 - For both compositions, the log will show repeating messages `ERROR:

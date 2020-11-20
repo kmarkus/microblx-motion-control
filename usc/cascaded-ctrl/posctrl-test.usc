@@ -6,6 +6,8 @@ return bd.system {
    imports = {
       "stdtypes",
       "mqueue",
+      "ramp_double",
+      "math_double",
    },
 
    node_configurations = {
@@ -18,10 +20,48 @@ return bd.system {
       bd.load("posctrl.usc"),
    },
 
+   blocks = {
+      { name="ramp", type="ubx/ramp_double" },
+      { name="sin", type="ubx/math_double" },
+   },
+
+   configurations = {
+      {
+	 name="ramp",
+	 config = {
+	    slope={0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	    data_len = 7
+	 }
+      },
+      {
+	 name="sin",
+	 config = {
+	    func = "sin",
+	    data_len = 7
+	 }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#ramp" },
+	       { b = "#sin" },
+	       { b = "#arm" },
+	       { b = "#velctrl" },
+	       { b = "#posctrl" },
+	    }
+	 },
+      },
+
+   },
 
    connections = {
+      { src="ramp.out", tgt="sin.x" },
+      { src="sin.y", tgt="posctrl.des" },
+
       -- exported for testing / debugging
-      { tgt="posctrl.des", type="ubx/mqueue" },
+      { src="ramp.out", type="ubx/mqueue" },
+      { src="sin.y", type="ubx/mqueue" },
       { src="posctrl.out", type="ubx/mqueue" },
       { src="velctrl.out", type="ubx/mqueue" },
    }

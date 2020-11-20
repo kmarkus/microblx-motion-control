@@ -8,6 +8,7 @@ return bd.system {
       "pid",
       "manipulator",
       "trig",
+      "iconst"
    },
 
    node_configurations = {
@@ -21,19 +22,21 @@ return bd.system {
       { name = "velctrl", type="ubx/pid" },
       { name = "arm", type="mc/manipulator" },
       { name = "trig", type="ubx/trig" },
+      { name = "ctrl_mode", type="ubx/iconst" },
    },
 
    configurations = {
+      -- constant (iblock)
+      {
+	 name="ctrl_mode",
+	 config = { type_name = "int", data_len = 1, value =  1 }
+      },
       {
 	 name = "velctrl",
 	 config = {
 	    data_len = "&data_len",
 	    Kp = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
 	 }
-      },
-      {
-	 name = "arm",
-	 config = { ctrl_mode = 2 }
       },
       {
 	 name = "trig",
@@ -47,6 +50,9 @@ return bd.system {
    },
 
    connections = {
+      -- constant
+      { src="ctrl_mode", tgt="arm.ctrl_mode" },
+
       -- inner velocity loop
       {	src="arm.vel_msr", tgt="velctrl.msr" },
       {	src="velctrl.out", tgt="arm.eff_cmd" },

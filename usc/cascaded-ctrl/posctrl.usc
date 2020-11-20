@@ -37,8 +37,8 @@ return bd.system {
 	 config = {
 	    chain0 = {
 	       { b = "#arm" },
-	       { b = "#velctrl", every=10 },
-	       { b = "#posctrl", every=10 },
+	       { b = "#velctrl" },
+	       { b = "#posctrl" },
 	    }
 	 },
       },

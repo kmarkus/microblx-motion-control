@@ -1,0 +1,99 @@
+-- overlay the posctrl composition for use with the kinova arm
+
+local URDF_FILE="/home/mk/src/git/rosym/vericomp-application/kortex_description/arms/gen3/7dof/urdf/gen3.urdf"
+
+local MESH_BASE="/home/mk/src/git/rosym/vericomp-application/kortex_description/arms/gen3/7dof/meshes"
+
+local MESH_NAMES = {
+   "base_link.STL",
+   "shoulder_link.STL",
+   "half_arm_1_link.STL",
+   "half_arm_2_link.STL",
+   "forearm_link.STL",
+   "spherical_wrist_1_link.STL",
+   "spherical_wrist_2_link.STL",
+   "bracelet_with_vision_link.STL"
+}
+
+return bd.system {
+
+   imports = {
+      "stdtypes", "lfds_cyclic", "mqueue",
+      "iconst", "ramp_double", "math_double", "ptrig",
+      "sim2b_bullet", "vis2b", "kinova_fpk",
+   },
+
+   node_configurations = {
+      -- This global configuration defines the data-dimension,
+      -- i.e. DOFs of the involved blocks.
+      data_len = { type = "long", config = 7 },
+   },
+
+   subsystems = {
+      bd.load("posctrl.usc"),
+   },
+
+   blocks = {
+      { name = "arm", type = "sim2b/sim_bullet" },
+      { name = "fpk", type = "kinova_fpk" },
+      { name = "vis", type = "vis2b/osg" },
+      { name = "max_trq", type = "ubx/iconst" },
+      { name = "ctrl_mode", type = "ubx/iconst" },
+   },
+
+   configurations = {
+      -- constants
+      {
+	 name="ctrl_mode",
+	 config = {
+	    type_name = "int",
+	    data_len = 1,
+	    value =  1
+	 }
+      },
+      {
+	 name="max_trq",
+	 config = {
+	    type_name = "double",
+	    data_len = 7,
+	    value =  { 39.0, 39.0, 39.0, 39.0, 9.0, 9.0, 9.0 },
+	 }
+      },
+
+      {
+	 name="arm",
+	 config = {
+	    nr_joints = 7,
+	    gravity = { 0, 0, -9.81 },
+	    jnt_pos_init = {0, 0, 0, 0, 0, 0, 0},
+	    urdf = URDF_FILE
+	 }
+      },
+      {
+	 name="vis",
+	 config = {
+	    nr_joints = 7,
+	    mesh_base = MESH_BASE,
+	    mesh_names = table.concat(MESH_NAMES, ':') }
+      },
+      {
+	 name = "trig",
+	 config = {
+	    chain0 = {
+	       { b = "#arm" },
+	       { b = "#velctrl", every=10 },
+	       { b = "#posctrl", every=10 },
+	    }
+	 },
+      }
+   },
+
+   connections = {
+      -- constants
+      { src="ctrl_mode", tgt="arm.ctrl_mode" },
+      { src="max_trq", tgt="arm.jnt_eff_max" },
+
+      { src="arm.jnt_pos_msr", tgt="fpk.jnt_pos" },
+      { src="fpk.poses", tgt="vis.poses" },
+   }
+}
