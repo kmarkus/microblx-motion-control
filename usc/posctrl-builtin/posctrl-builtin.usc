@@ -49,8 +49,8 @@ return bd.system {
    },
 
    connections = {
-      {	src="arm.pos_msr", tgt="posctrl.msr" },
-      {	src="posctrl.out", tgt="arm.vel_cmd" },
+      {	src="arm.jnt_pos_msr", tgt="posctrl.msr" },
+      {	src="posctrl.out", tgt="arm.jnt_vel_cmd" },
 
       -- exported for testing / debugging
       { tgt="posctrl.des", type="ubx/mqueue" },

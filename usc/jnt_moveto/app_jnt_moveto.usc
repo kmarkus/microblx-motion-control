@@ -65,15 +65,15 @@ return bd.system {
    },
 
    connections = {
-      {	src="arm.pos_msr", tgt="trajgen.pos_msr" },
-      {	src="arm.vel_msr", tgt="trajgen.vel_msr" },
-      {	src="trajgen.vel_cmd", tgt="arm.vel_cmd", config={loglevel_overruns=7}},
+      {	src="arm.jnt_pos_msr", tgt="trajgen.jnt_pos_msr" },
+      {	src="arm.jnt_vel_msr", tgt="trajgen.jnt_vel_msr" },
+      {	src="trajgen.jnt_vel_cmd", tgt="arm.jnt_vel_cmd", config={loglevel_overruns=7}},
 
       -- export desired velocity
       {	tgt="trajgen.pos_des", type="ubx/mqueue" },
       {	tgt="trajgen.vel_des", type="ubx/mqueue" },
 
       -- for debugging
-      {	src="trajgen.vel_cmd", type="ubx/mqueue" },
+      {	src="trajgen.jnt_vel_cmd", type="ubx/mqueue" },
    }
 }

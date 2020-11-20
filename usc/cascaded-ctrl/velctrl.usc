@@ -54,7 +54,7 @@ return bd.system {
       { src="ctrl_mode", tgt="arm.ctrl_mode" },
 
       -- inner velocity loop
-      {	src="arm.vel_msr", tgt="velctrl.msr" },
-      {	src="velctrl.out", tgt="arm.eff_cmd" },
+      {	src="arm.jnt_vel_msr", tgt="velctrl.msr" },
+      {	src="velctrl.out", tgt="arm.jnt_eff_cmd" },
    }
 }

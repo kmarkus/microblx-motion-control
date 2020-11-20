@@ -46,7 +46,7 @@ return bd.system {
 
    connections = {
       -- outer position loop
-      {	src="arm.pos_msr", tgt="posctrl.msr" },
+      {	src="arm.jnt_pos_msr", tgt="posctrl.msr" },
       {	src="posctrl.out", tgt="velctrl.des" },
    }
 }
