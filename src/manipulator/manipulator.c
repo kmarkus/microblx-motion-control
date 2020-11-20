@@ -120,11 +120,12 @@ out:
 	return ret;
 }
 
+#if 0 /* kept here as this block is to serve as	an example */
 /* start */
 int manipulator_start(ubx_block_t *b)
 {
-	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-	ubx_info(b, "%s", __func__);
+	struct manipulator_info *inf = (struct manipulator_info*) b->private_data;
+	ubx_debug(b, "%s", __func__);
 	int ret = 0;
 	return ret;
 }
@@ -132,16 +133,17 @@ int manipulator_start(ubx_block_t *b)
 /* stop */
 void manipulator_stop(ubx_block_t *b)
 {
-	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-	ubx_info(b, "%s", __func__);
+	struct manipulator_info *inf = (struct manipulator_info*) b->private_data;
+	ubx_debug(b, "%s", __func__);
 }
+#endif
 
 /* cleanup */
 void manipulator_cleanup(ubx_block_t *b)
 {
-	/* struct manipulator_info *inf = (struct manipulator_info*) b->private_data; */
-	ubx_info(b, "%s", __func__);
-	free(b->private_data);
+	struct manipulator_info *inf = (struct manipulator_info*) b->private_data;
+	ubx_debug(b, "%s", __func__);
+	free(inf);
 }
 
 /* step */
@@ -191,8 +193,9 @@ ubx_proto_block_t manipulator_block = {
 	.ports = manipulator_ports,
 
 	.init = manipulator_init,
-	.start = manipulator_start,
-	.stop = manipulator_stop,
+	/* uncomment if used */
+	/* .start = manipulator_start, */
+	/* .stop = manipulator_stop, */
 	.cleanup = manipulator_cleanup,
 	.step = manipulator_step,
 };
