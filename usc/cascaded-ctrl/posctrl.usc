@@ -28,8 +28,7 @@ return bd.system {
 	 name = "posctrl",
 	 config = {
 	    data_len = "&data_len",
-	    Kp = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
-	    Ki = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	    Kp = { 2, 2, 2, 2, 2, 2, 2 },
 	 }
       },
       {

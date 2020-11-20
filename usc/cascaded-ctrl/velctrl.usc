@@ -29,13 +29,13 @@ return bd.system {
       -- constant (iblock)
       {
 	 name="ctrl_mode",
-	 config = { type_name = "int", data_len = 1, value =  1 }
+	 config = { type_name = "int", data_len = 1, value = 1 }
       },
       {
 	 name = "velctrl",
 	 config = {
 	    data_len = "&data_len",
-	    Kp = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
+	    Kp = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 },
 	 }
       },
       {
@@ -55,6 +55,6 @@ return bd.system {
 
       -- inner velocity loop
       {	src="arm.jnt_vel_msr", tgt="velctrl.msr" },
-      {	src="velctrl.out", tgt="arm.jnt_eff_cmd" },
+      {	src="velctrl.out", tgt="arm.jnt_vel_cmd" },
    }
 }

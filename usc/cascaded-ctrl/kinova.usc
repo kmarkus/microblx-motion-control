@@ -55,7 +55,7 @@ return bd.system {
 	 name="max_trq",
 	 config = {
 	    type_name = "double",
-	    data_len = 7,
+	    data_len = "&data_len",
 	    value =  { 39.0, 39.0, 39.0, 39.0, 9.0, 9.0, 9.0 },
 	 }
       },
@@ -63,7 +63,7 @@ return bd.system {
       {
 	 name="arm",
 	 config = {
-	    nr_joints = 7,
+	    nr_joints = "&data_len",
 	    gravity = { 0, 0, -9.81 },
 	    jnt_pos_init = {0, 0, 0, 0, 0, 0, 0},
 	    urdf = URDF_FILE
@@ -72,7 +72,7 @@ return bd.system {
       {
 	 name="vis",
 	 config = {
-	    nr_joints = 7,
+	    nr_joints = "&data_len",
 	    mesh_base = MESH_BASE,
 	    mesh_names = table.concat(MESH_NAMES, ':') }
       },
@@ -80,9 +80,11 @@ return bd.system {
 	 name = "trig",
 	 config = {
 	    chain0 = {
+	       { b = "#posctrl" },
+	       { b = "#velctrl" },
 	       { b = "#arm" },
-	       { b = "#velctrl", every=10 },
-	       { b = "#posctrl", every=10 },
+	       { b = "#fpk", every=10 },
+	       { b = "#vis", every=10 }
 	    }
 	 },
       }
@@ -93,7 +95,10 @@ return bd.system {
       { src="ctrl_mode", tgt="arm.ctrl_mode" },
       { src="max_trq", tgt="arm.jnt_eff_max" },
 
-      { src="arm.jnt_pos_msr", tgt="fpk.jnt_pos" },
+      { src="arm.jnt_pos_msr", tgt="fpk.jnt_pos", config={loglevel_overruns=-1} },
       { src="fpk.poses", tgt="vis.poses" },
+
+      -- external control
+      { tgt="posctrl.des", type="ubx/mqueue" },
    }
 }

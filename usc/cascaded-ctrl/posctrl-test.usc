@@ -30,14 +30,14 @@ return bd.system {
 	 name="ramp",
 	 config = {
 	    slope={0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 },
-	    data_len = 7
+	    data_len = "&data_len",
 	 }
       },
       {
 	 name="sin",
 	 config = {
 	    func = "sin",
-	    data_len = 7
+	    data_len = "&data_len",
 	 }
       },
       {
