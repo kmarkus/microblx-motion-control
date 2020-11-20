@@ -35,7 +35,7 @@ const char *ctrl_modes [] = {
 };
 
 ubx_proto_config_t manipulator_config[] = {
-	{ .name="ctrl_mode", .type_name = "int", .min=1, .max=1, .doc="initial ctrl_mode: 0: pos, 1: vel, 2: eff, 3: cur" },
+	{ .name="ctrl_mode", .type_name = "int", .min=0, .max=1, .doc="initial ctrl_mode: 0: pos, 1: vel, 2: eff, 3: cur (def: 0)" },
 	{ 0 },
 };
 
@@ -93,14 +93,13 @@ int manipulator_init(ubx_block_t *b)
 
 	/* ctrl_mode */
 	len = cfg_getptr_int(b, "ctrl_mode", &ctrl_mode);
-	assert(len>0);
+	inf->ctrl_mode = (len == 0) ? 0 : *ctrl_mode;
 
-	if(*ctrl_mode < 0 || *ctrl_mode >= __CTRL_MODE_LAST__) {
-		ubx_err(b, "invalid ctrl_mode %i", *ctrl_mode);
+	if(inf->ctrl_mode < 0 || inf->ctrl_mode >= __CTRL_MODE_LAST__) {
+		ubx_err(b, "invalid ctrl_mode %i", inf->ctrl_mode);
 		ret = -1;
 		goto out_free;
 	}
-	inf->ctrl_mode = *ctrl_mode;
 
 	/* cache ports */
 	inf->ports.ctrl_mode = ubx_port_get(b, "ctrl_mode");
@@ -158,7 +157,7 @@ void manipulator_step(ubx_block_t *b)
 
 	if (len > 0) {
 		if (ctrl_mode < 0 || ctrl_mode >= __CTRL_MODE_LAST__) {
-			ubx_err(b, "invalid ctrl_mode %i requested", ctrl_mode);
+			ubx_err(b, "invalid ctrl_mode %i requested - ignoring", ctrl_mode);
 			goto cont;
 
 		}
