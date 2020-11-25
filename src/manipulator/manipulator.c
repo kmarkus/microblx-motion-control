@@ -14,7 +14,7 @@
 
 /* of course this could be made configurable, but for any real robot
  * that will not be the case, so we don't bother with it here */
-#define NUM_JOINTS	7
+#define NUM_JOINTS	6
 
 const char manipulator_block_name[] = "mc/manipulator";
 const char manipulator_meta[] = "a dummy 7-DOF robot manipulator block";
