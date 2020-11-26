@@ -51,12 +51,16 @@ if ("${LIBRML_FOUND}")
   install(TARGETS trajgen_rml DESTINATION ${UBX_MODDIR})
 endif()
 
-# manipulator
-add_library(fwkin SHARED src/fwkin/fwkin.cpp)
-target_link_libraries(fwkin ${UBX_LDFLAGS} ${KDL_LDFLAGS} ${KDL_PARSER_LDFLAGS})
-set_target_properties(fwkin PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE PREFIX "")
-target_compile_options(fwkin PUBLIC
-  ${UBX_CFLAGS} ${KDL_CFLAGS}
-  -Wno-missing-field-initializers
-  -fvisibility=hidden)
-install(TARGETS fwkin DESTINATION ${UBX_MODDIR})
+if (KDL_FOUND AND KDL_PARSER_FOUND AND KDL_CONV_FOUND AND UBXKDL_FOUND)
+  message("building fwkin")
+  add_library(fwkin SHARED src/fwkin/fwkin.cpp)
+  target_link_libraries(fwkin ${UBX_LDFLAGS} ${KDL_LDFLAGS} ${KDL_PARSER_LDFLAGS})
+  set_target_properties(fwkin PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE PREFIX "")
+  target_compile_options(fwkin PUBLIC
+    ${UBX_CFLAGS} ${KDL_CFLAGS}
+    -Wno-missing-field-initializers
+    -fvisibility=hidden)
+  install(TARGETS fwkin DESTINATION ${UBX_MODDIR})
+else()
+  message("didn't find one or more of KDL, KDL_PARSER, KDL_CONV or UBXKDL")
+endif()

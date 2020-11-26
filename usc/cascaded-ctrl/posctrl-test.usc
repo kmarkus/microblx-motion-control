@@ -64,5 +64,6 @@ return bd.system {
       { src="sin.y", type="ubx/mqueue" },
       { src="posctrl.out", type="ubx/mqueue" },
       { src="velctrl.out", type="ubx/mqueue" },
+      { src="arm.jnt_pos_msr", type="ubx/mqueue" },
    }
 }
